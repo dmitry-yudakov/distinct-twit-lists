@@ -11,16 +11,33 @@ var oauth = new OAuth.OAuth(
 	null,
 	'HMAC-SHA1'
 );
-oauth.get(
-	'https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov',
-	'2189917776-fjORdeQFd8N7xfH4WDLZKjdIMryrZUjTNZYVfiY', //test user token
-	'X4ptclZNVDv3LDYgNSS2cg5wK4YFSCWFZR9MFeYEB5r27', //test user secret            
-	function (e, data, res) {
-		if (e) console.error(e);
-		var lists = JSON.parse(data);
-		console.log('data:', lists);
-		lists.forEach(function(it){
-			console.log('List', it.name);
+
+var debug = false;
+
+function oauthGet(url, cb) {
+	oauth.get(
+		url,
+		'2189917776-fjORdeQFd8N7xfH4WDLZKjdIMryrZUjTNZYVfiY', //test user token
+		'X4ptclZNVDv3LDYgNSS2cg5wK4YFSCWFZR9MFeYEB5r27', //test user secret  
+		function (e, data, res) {
+			if (debug) console.log('URL ', url, 'received data:',
+//								   data);
+								   ((data[0]==='{'||data[0]==='[')?JSON.parse(data):data)
+			);
+			cb(e, data, res);
 		});
-//		console.log(require('util').inspect(data));
-	});
+}
+
+function getLists(cb) {
+	oauthGet('https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov', cb);
+}
+
+function getStatuses(listID, cb) {
+	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + listID + '&count=20', cb);
+}
+
+
+module.exports = {
+	getLists: getLists,
+	getStatuses: getStatuses
+}

@@ -1,0 +1,20 @@
+html(ng-app='twitlists')
+	head
+		title!= title
+		script(src="/angular/angular.js")
+		script(src="/angular-route/angular-route.js")
+		script(src="/js/controllers.js")
+	body(ng-controller='twitlistsCtrl')
+		h3!= title
+		#search
+			//p Search:
+			//input(ng-model="query")
+			p Current list: {{currentList.name}}
+		ul
+			li(ng-repeat='list in lists ') 
+				// | filter:query
+				div(ng-click="setCurrentList(list)")
+					a(href="#" ) {{list.name}}
+					
+		ul
+			li(ng-repeat='tw in tweets') {{tw.text }}

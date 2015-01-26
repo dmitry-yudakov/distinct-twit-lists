@@ -4,6 +4,9 @@ twitlistsApp.controller('twitlistsCtrl',
 	function ($scope, $http, $routeParams) {
 		$http.get('/getLists').success(function (data) {
 			$scope.lists = data;
+			if( data.length ) {
+				$scope.setCurrentList( data[0] );
+			}
 		});
 		$scope.setCurrentList = function (list) {
 			$scope.currentList = list;

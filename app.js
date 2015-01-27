@@ -41,6 +41,18 @@ app.get('/getLists', function (req, res) {
 		res.send(lists);
 	});
 });
+app.get('/getListMembers/:id', function (req, res) {
+	twitlist.getListMembers(req.params.id, function (err, data) {
+		res.send(data);
+	});
+});
+
+app.get('/getFriends', function (req, res) {
+	twitlist.getFriends(function (err, data) {
+		res.send(data);
+	});
+});
+
 
 app.get('/getStatuses/:id', function (req, res) {
 //	console.log("req", req);

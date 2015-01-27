@@ -12,7 +12,7 @@ var oauth = new OAuth.OAuth(
 	'HMAC-SHA1'
 );
 
-var debug = false;
+var debug = true;
 
 function oauthGet(url, cb) {
 	oauth.get(
@@ -20,9 +20,8 @@ function oauthGet(url, cb) {
 		'2189917776-fjORdeQFd8N7xfH4WDLZKjdIMryrZUjTNZYVfiY', //test user token
 		'X4ptclZNVDv3LDYgNSS2cg5wK4YFSCWFZR9MFeYEB5r27', //test user secret  
 		function (e, data, res) {
-			if (debug) console.log('URL ', url, 'received data:',
-//								   data);
-								   ((data[0]==='{'||data[0]==='[')?JSON.parse(data):data)
+			if (debug) console.log( 'URL ', url, 'received data:',
+								    ((!e && data) ? JSON.parse(data) : data)
 			);
 			cb(e, data, res);
 		});
@@ -36,8 +35,19 @@ function getStatuses(listID, cb) {
 	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + listID + '&count=20', cb);
 }
 
+function getListMembers(listID, cb) {
+	var maxCount = 5;
+	oauthGet('https://api.twitter.com/1.1/lists/members.json?list_id=' + listID + '&count=' + maxCount, cb);// TODO load more than 5K
+}
+
+function getFriends(cb) {
+	var maxCount = 5000;
+	oauthGet('https://api.twitter.com/1.1/friends/ids.json?screen_name=DmitryYudakov&stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
+}
 
 module.exports = {
 	getLists: getLists,
-	getStatuses: getStatuses
+	getStatuses: getStatuses,
+	getFriends: getFriends,
+	getListMembers: getListMembers
 }

@@ -5,25 +5,40 @@ var OAuth = require('oauth');
 var oauth = new OAuth.OAuth(
 	'https://api.twitter.com/oauth/request_token',
 	'https://api.twitter.com/oauth/access_token',
-	'zgTw9HRJpjMmhzFrgZjyIN3Pp', // consumer key
-	'7LMrxMPr9MK7yWvloLIQOGfbQGmvPEnaeLn6U6wuBD80MpMlU0', //'your application secret',
+	'rTozze3VGXh0hSPEy1mOvvhik', // consumer key
+	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', //'your application secret',
 	'1.0A',
 	null,
 	'HMAC-SHA1'
 );
 
-var debug = true;
+var debug = false;
+var user_token = '2189917776-ge1q7rTV1ZYV64Qqs2jakPvHvSkNfetX1fIHYKv';
+var user_secret = 'Dc4Ik0YafSnHwNXELGrhHoSUa87X9k7ej0uDL0vKuGrNv';
 
 function oauthGet(url, cb) {
 	oauth.get(
 		url,
-		'2189917776-fjORdeQFd8N7xfH4WDLZKjdIMryrZUjTNZYVfiY', //test user token
-		'X4ptclZNVDv3LDYgNSS2cg5wK4YFSCWFZR9MFeYEB5r27', //test user secret  
+		user_token,
+		user_secret, 
 		function (e, data, res) {
 			if (debug) console.log( 'URL ', url, 'received data:',
 								    ((!e && data) ? JSON.parse(data) : data)
 			);
 			cb(e, data, res);
+		});
+}
+function oauthPost(url, params, cb) {
+	oauth.post(
+		url,
+		user_token,
+		user_secret,
+		params,
+		function (e, data) {
+			if (debug) console.log( 'URL ', url, 'received data:',
+								    ((!e && data) ? JSON.parse(data) : data)
+			);
+			cb(e, data);
 		});
 }
 
@@ -36,8 +51,8 @@ function getStatuses(listID, cb) {
 }
 
 function getListMembers(listID, cb) {
-	var maxCount = 5;
-	oauthGet('https://api.twitter.com/1.1/lists/members.json?list_id=' + listID + '&count=' + maxCount, cb);// TODO load more than 5K
+	var maxCount = 5000;
+	oauthGet('https://api.twitter.com/1.1/lists/members.json?list_id=' + listID + '&count=' + maxCount, cb);
 }
 
 function getFriends(cb) {
@@ -45,9 +60,24 @@ function getFriends(cb) {
 	oauthGet('https://api.twitter.com/1.1/friends/ids.json?screen_name=DmitryYudakov&stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
 }
 
+function createList(listName, cb) {
+	oauthPost( 'https://api.twitter.com/1.1/lists/create.json',
+			   {name:listName, mode:'private'}, //?name=test&mode=private
+			   cb);
+}
+
+// membersList is comma separated string
+function addMembersToList(listID, membersList, cb){
+	oauthPost( 'https://api.twitter.com/1.1/lists/members/create_all.json',
+			   {list_id:listID, screen_name :membersList},
+			   cb);
+}
+
 module.exports = {
 	getLists: getLists,
 	getStatuses: getStatuses,
 	getFriends: getFriends,
-	getListMembers: getListMembers
+	getListMembers: getListMembers,
+	createList: createList,
+	addMembersToList: addMembersToList
 }

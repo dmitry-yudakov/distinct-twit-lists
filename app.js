@@ -47,6 +47,17 @@ app.get('/getListMembers/:id', function (req, res) {
 	});
 });
 
+app.post('/createList/:name', function(req, res) {
+	twitlist.createList( req.params.name, function(err,data){
+		res.send(data);
+	});
+});
+app.post('/addMembersToList/:listid/:members', function(req, res) {
+	twitlist.addMembersToList( req.params.listid, req.params.members, function(err,data){
+		res.send(data);
+	});
+});
+
 app.get('/getFriends', function (req, res) {
 	twitlist.getFriends(function (err, data) {
 		res.send(data);

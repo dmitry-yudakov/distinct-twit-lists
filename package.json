@@ -1,5 +1,5 @@
 {
-  "name": "manage-twit-lists",
+  "name": "distinct-twit-lists",
   "version": "0.0.0",
   "description": "Easily manage twitter lists items",
   "main": "twitlist.js",

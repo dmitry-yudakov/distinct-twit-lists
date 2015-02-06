@@ -4,17 +4,36 @@ html(ng-app='twitlists')
 		script(src="/angular/angular.js")
 		script(src="/angular-route/angular-route.js")
 		script(src="/js/controllers.js")
+		link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+		//link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css")
+		script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
+		style
+			include style.css
+			
+	
 	body(ng-controller='twitlistsCtrl')
 		h3!= title
-		#search
+		//#search
 			//p Search:
 			//input(ng-model="query")
-			p Current list: {{currentList.name}}
-		ul
-			li(ng-repeat='list in lists ') 
+			//p Current list: {{currentList.name}}
+		//p Lists
+		//ul
+			//li(ng-repeat='list in lists ') 
 				// | filter:query
-				div(ng-click="setCurrentList(list)")
-					a(href="#" ) {{list.name}}
+				//div(ng-click="setCurrentList(list)")
+					//a(href="#" ) {{list.name}}
 					
-		ul
-			li(ng-repeat='tw in tweets') {{tw.text }}
+		//p Following
+		//ul
+			//li(ng-repeat='fr in friendsNotInLists ') 
+				//p {{fr}}
+		
+		div(class="container twpanel")
+			div(class="row")
+				div(class="_col-xs-4 twcolumn" ng-repeat="twList in tweetsByList")
+					h4 {{twList.name}}
+					div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
+						div(class="panel-heading")
+							div(class="panel-title") {{tw.user.name}}
+						div(class="panel-body") {{tw.text }}

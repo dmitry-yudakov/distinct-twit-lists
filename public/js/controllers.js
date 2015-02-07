@@ -112,5 +112,9 @@ twitlistsApp.controller('twitlistsCtrl',
 		//	$scope.currentList = '';
 		//	$http.get('/getStatuses/'+$routeParams.listID).success(function(data){
 
+		$scope.print = function(tw) {
+//			alert(JSON.stringify(tw, null, '\t'));
+			console.log(tw);
+		}
 	}
 );

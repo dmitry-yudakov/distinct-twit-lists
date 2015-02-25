@@ -25,9 +25,11 @@ html(ng-app='twitlists')
 					.listTweets
 						div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
 							div(class="panel-heading")
+								a(href="https://twitter.com/{{tw.user.screen_name}}") 
 								img(src="{{tw.user.profile_image_url}}") 
 								|  
-								span(class="panel-title") {{tw.user.name}}
+								span(class="panel-title") 
+									a(href="https://twitter.com/{{tw.user.screen_name}}") {{tw.user.name}}
 							div(class="panel-body") 
 								div
 									div(class="tweet-text") {{tw.text }} 

@@ -22,6 +22,7 @@ html(ng-app='twitlists')
 				.twcolumn(ng-repeat="twList in tweetsByList")
 					.listName
 						h4 {{twList.name}}
+						a(href="#" ng-click="print(twList)") pp
 					.listTweets
 						div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
 							div(class="panel-heading")

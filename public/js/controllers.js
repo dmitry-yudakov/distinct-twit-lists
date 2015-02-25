@@ -65,6 +65,7 @@ twitlistsApp.controller('twitlistsCtrl',
 				$http.get('/getStatuses/' + it.id).success(function (data) {
 					$scope.tweetsByList[it.name] = {
 						name: it.name,
+						info: it,
 						tweets: data
 					}
 				});

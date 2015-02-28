@@ -57,6 +57,20 @@ app.post('/addMembersToList/:listid/:members', function(req, res) {
 		res.send(data);
 	});
 });
+app.post('/moveMember/:member/:srcList/:targetList', function(req, res) {
+	console.log('Move %s from %s to %s', req.params.member, req.params.srcList, req.params.targetList);
+										   
+	twitlist.addMembersToList( req.params.targetList, req.params.member, function(err,data){
+		if(!err){
+			twitlist.removeMembersFromList(req.params.srcList, req.params.member, function(err,data){
+				res.send(data);
+			});
+		} else {
+			console.log('Error', err);
+			res.send(err);
+		}
+	});
+});
 
 app.get('/getFriends', function (req, res) {
 	twitlist.getFriends(function (err, data) {

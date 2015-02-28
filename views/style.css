@@ -55,3 +55,8 @@
 	overflow: auto;
 	height: 100%;
 }
+
+.dy_screen_name
+{
+	cursor: move;
+}

@@ -9,7 +9,6 @@ html(ng-app='twitlists')
 		script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
 		style
 			include style.css
-			
 	
 	body(ng-controller='twitlistsCtrl')
 		nav(class="navbar navbar-default")
@@ -25,12 +24,14 @@ html(ng-app='twitlists')
 						a(href="#" ng-click="print(twList)") pp
 					.listTweets
 						div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
-							div(class="panel-heading")
+							div(class="panel-heading" tweet="{{tw}}")
 								a(href="https://twitter.com/{{tw.user.screen_name}}") 
-								img(src="{{tw.user.profile_image_url}}") 
-								|  
-								span(class="panel-title") 
-									a(href="https://twitter.com/{{tw.user.screen_name}}") {{tw.user.name}}
+									img(src="{{tw.user.profile_image_url}}") 
+									|  
+									span(class="panel-title") 
+										a(href="https://twitter.com/{{tw.user.screen_name}}") {{tw.user.name}} @ 
+										span(class="dy_screen_name" draggable="true" styleX="display:none") {{tw.user.screen_name}}
+											div(class="dy_list_name" style="display:none") {{twList.name}}
 							div(class="panel-body") 
 								div
 									div(class="tweet-text") {{tw.text }} 

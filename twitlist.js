@@ -73,11 +73,19 @@ function addMembersToList(listID, membersList, cb){
 			   cb);
 }
 
+// membersList is comma separated string
+function removeMembersFromList(listID, membersList, cb){
+	oauthPost( 'https://api.twitter.com/1.1/lists/members/destroy_all.json',
+			   {list_id:listID, screen_name :membersList},
+			   cb);
+}
+
 module.exports = {
 	getLists: getLists,
 	getStatuses: getStatuses,
 	getFriends: getFriends,
 	getListMembers: getListMembers,
 	createList: createList,
-	addMembersToList: addMembersToList
+	addMembersToList: addMembersToList,
+	removeMembersFromList: removeMembersFromList
 }

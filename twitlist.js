@@ -46,8 +46,8 @@ function getLists(cb) {
 	oauthGet('https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov', cb);
 }
 
-function getStatuses(listID, cb) {
-	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + listID + '&count=20', cb);
+function getStatuses(params, cb) {
+	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + params.listID + '&count=20', cb);
 }
 
 function getListMembers(listID, cb) {

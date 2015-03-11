@@ -85,7 +85,9 @@ app.get('/getStatuses/:id', function (req, res) {
 		res.send("");
 		return;
 	}
-	twitlist.getStatuses(req.params.id, function (err, statuses) {
+	twitlist.getStatuses({
+		listID: req.params.id
+	}, function (err, statuses) {
 		res.send(statuses);
 	});
 });

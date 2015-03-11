@@ -125,7 +125,8 @@ twitlistsApp.controller('twitlistsCtrl',
 					}
 					
 					if(--pendingLists == 0){
-						setEventHandlers();
+						// workaround - it takes time between changing the data and building html
+						setTimeout(setEventHandlers, 1000);
 					}
 				});
 			});

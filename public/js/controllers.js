@@ -99,7 +99,7 @@ twitlistsApp.controller('twitlistsCtrl',
 							console.log('Move %s from %s to %s', item.member, item.list, targetListName);
 							$http.post('/moveMember/'+item.member+'/'+item.list_id+'/'+ targetListId).success(function (data) {
 								console.log('Move completed');
-								loadTweets();
+								loadTweets({lists:[item.list_id, targetListId]});
 							});
 						}
 					}
@@ -113,11 +113,22 @@ twitlistsApp.controller('twitlistsCtrl',
 		//	alert('hello'+cols.length);
 		}
 	
-		function loadTweets() {
+		function loadTweets(params) {
 			var pendingLists = 0;
-			$scope.lists.forEach(function (it) {
+			var listsToLoad = $scope.lists;
+			if (params) {
+				if(params.lists) {
+					listsToLoad = [];
+					$scope.lists.forEach(function (it) {
+						if(params.lists.indexOf(it.id) != -1) {
+							listsToLoad.push(it);
+						}
+					});
+				}
+			}
+			listsToLoad.forEach(function (it) {
 				++pendingLists;
-				$http.get('/getStatuses/' + it.id).success(function (data) {
+				$http.get('/getStatuses/' + it.id + '?koi=segaenomeredno').success(function (data) {
 					$scope.tweetsByList[it.name] = {
 						name: it.name,
 						info: it,

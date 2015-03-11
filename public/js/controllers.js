@@ -114,6 +114,7 @@ twitlistsApp.controller('twitlistsCtrl',
 		}
 	
 		function loadTweets(params) {
+			console.log('Load tweets');
 			var pendingLists = 0;
 			var listsToLoad = $scope.lists;
 			if (params) {
@@ -128,12 +129,28 @@ twitlistsApp.controller('twitlistsCtrl',
 			}
 			listsToLoad.forEach(function (it) {
 				++pendingLists;
-				$http.get('/getStatuses/' + it.id + '?koi=segaenomeredno').success(function (data) {
-					$scope.tweetsByList[it.name] = {
-						name: it.name,
-						info: it,
-						tweets: data
+				var idHint = '';
+				if(it.maxTweetId 
+				   && !params.lists) { // kinda ugly, needs rework
+					idHint = '&since_id=' + it.maxTweetId;
+				}
+				$http.get('/getStatuses/' + it.id + idHint).success(function (data) {
+					console.log('received statuses data', data);
+					if(!data.length)
+						return;
+					var list = $scope.tweetsByList[it.name];
+					if( ! list ) {
+						$scope.tweetsByList[it.name] = list = {
+							name: it.name,
+							info: it,
+							tweets: []
+						};
 					}
+					//append new tweets to the old ones
+					Array.prototype.unshift.apply(list.tweets, data);
+					
+					it.maxTweetId = data[0].id_str;
+					console.log('latest id', data[0].id_str);
 					
 					if(--pendingLists == 0){
 						// workaround - it takes time between changing the data and building html
@@ -173,6 +190,7 @@ twitlistsApp.controller('twitlistsCtrl',
 //			});
 			
 			loadTweets();
+			setInterval(function(){loadTweets()}, 30*1000);
 		});
 
 		$scope.setCurrentList = function (list) {

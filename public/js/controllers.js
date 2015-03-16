@@ -1,4 +1,4 @@
-var twitlistsApp = angular.module('twitlists', ['ngRoute']);
+var twitlistsApp = angular.module('twitlists', ['ngRoute', 'infinite-scroll']);
 
 twitlistsApp.controller('twitlistsCtrl',
 	function ($scope, $http, $routeParams) {
@@ -205,6 +205,10 @@ twitlistsApp.controller('twitlistsCtrl',
 		$scope.print = function(tw) {
 //			alert(JSON.stringify(tw, null, '\t'));
 			console.log(tw);
+		}
+		
+		$scope.loadMore = function(tweetList) {
+			console.log('Load more', tweetList);
 		}
 	}
 );

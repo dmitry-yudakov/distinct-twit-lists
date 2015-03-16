@@ -3,6 +3,7 @@ html(ng-app='twitlists')
 		title!= title
 		script(src="/angular/angular.js")
 		script(src="/angular-route/angular-route.js")
+		//script(src="/ng-infinite-scroll/build/ng-infinite-scroll.js")
 		script(src="/js/controllers.js")
 		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
 		link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
@@ -24,6 +25,7 @@ html(ng-app='twitlists')
 						h4 {{twList.name}}
 						a(href="#" ng-click="print(twList)") pp
 					.listTweets
+						//(infinite-scroll="loadMore(twList)")
 						div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
 							div(class="panel-heading" tweet="{{tw}}")
 								a(href="https://twitter.com/{{tw.user.screen_name}}") 

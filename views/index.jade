@@ -40,4 +40,4 @@ html(ng-app='twitlists')
 									div(class="tweet-text") {{tw.text }} 
 										a(href="{{tw.entities.urls[0].url}}") link
 										| 
-										a(href="#" ng-click="print(tw)") pp
+										a(href="#" ng-click="print(tw)") pp						button(ng-click='loadMore(twList)') Load More

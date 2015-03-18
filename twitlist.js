@@ -47,7 +47,14 @@ function getLists(cb) {
 }
 
 function getStatuses(params, cb) {
-	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + params.listID + '&count=20', cb);
+	var hint = '';
+	if(params.hint) {
+		console.log(params);
+		for(var i in params.hint) {
+			hint += '&' + i + '=' + params.hint[i];
+		}
+	}
+	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + params.listID + '&count=20' + hint, cb);
 }
 
 function getListMembers(listID, cb) {

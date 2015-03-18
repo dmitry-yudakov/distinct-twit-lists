@@ -99,7 +99,7 @@ twitlistsApp.controller('twitlistsCtrl',
 							console.log('Move %s from %s to %s', item.member, item.list, targetListName);
 							$http.post('/moveMember/'+item.member+'/'+item.list_id+'/'+ targetListId).success(function (data) {
 								console.log('Move completed');
-								loadTweets({lists:[item.list_id, targetListId]});
+								loadTweets({lists:[item.list_id, targetListId], reload:true});
 							});
 						}
 					}
@@ -114,10 +114,10 @@ twitlistsApp.controller('twitlistsCtrl',
 		}
 	
 		function loadTweets(params) {
-			console.log('Load tweets');
+			console.log('Load tweets', params);
 			var pendingLists = 0;
 			var listsToLoad = $scope.lists;
-			if (params) {
+
 				if(params.lists) {
 					listsToLoad = [];
 					$scope.lists.forEach(function (it) {
@@ -126,14 +126,17 @@ twitlistsApp.controller('twitlistsCtrl',
 						}
 					});
 				}
-			}
 			listsToLoad.forEach(function (it) {
 				++pendingLists;
 				var idHint = '';
-				if(it.maxTweetId 
-				   && !params.lists) { // kinda ugly, needs rework
-					idHint = '&since_id=' + it.maxTweetId;
+				if(!params.reload) { // partial load - either load new or load more
+					if(params.append) {
+						if(it.minTweetId) idHint += '?max_id=' + it.minTweetId;
+					} else {
+						if(it.maxTweetId) idHint += '?since_id=' + it.maxTweetId;
+					}
 				}
+				
 				$http.get('/getStatuses/' + it.id + idHint).success(function (data) {
 					console.log('received statuses data', data);
 					if(!data.length)
@@ -147,9 +150,16 @@ twitlistsApp.controller('twitlistsCtrl',
 						};
 					}
 					//append new tweets to the old ones
+					if(params.append) {
+						//first receive tweet we already have
+						data.shift();
+						Array.prototype.push.apply(list.tweets, data);
+					} else {
 					Array.prototype.unshift.apply(list.tweets, data);
+					}
 					
 					it.maxTweetId = data[0].id_str;
+					it.minTweetId = data[ data.length - 1 ].id_str;
 					console.log('latest id', data[0].id_str);
 					
 					if(--pendingLists == 0){
@@ -184,13 +194,13 @@ twitlistsApp.controller('twitlistsCtrl',
 //				$http.get('/getListMembers/' + it.id).success(function (data) {
 //					it.members = data.users;
 //					if (--pending === 0) detectFriendsNotInLists(function(){
-//						loadTweets();
+//						loadTweets({append:false});
 //					});
 //				});
 //			});
 			
-			loadTweets();
-			setInterval(function(){loadTweets()}, 30*1000);
+			loadTweets({append:false});
+			setInterval(function(){loadTweets({append:false})}, 30*1000);
 		});
 
 		$scope.setCurrentList = function (list) {
@@ -208,7 +218,9 @@ twitlistsApp.controller('twitlistsCtrl',
 		}
 		
 		$scope.loadMore = function(tweetList) {
+//			alert('Load more');
 			console.log('Load more', tweetList);
+			loadTweets({lists: [tweetList.info.id], append: true});
 		}
 	}
 );

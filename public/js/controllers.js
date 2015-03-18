@@ -200,7 +200,7 @@ twitlistsApp.controller('twitlistsCtrl',
 //			});
 			
 			loadTweets({append:false});
-			setInterval(function(){loadTweets({append:false})}, 30*1000);
+//			setInterval(function(){loadTweets({append:false})}, 30*1000);
 		});
 
 		$scope.setCurrentList = function (list) {

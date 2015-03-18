@@ -118,14 +118,14 @@ twitlistsApp.controller('twitlistsCtrl',
 			var pendingLists = 0;
 			var listsToLoad = $scope.lists;
 
-				if(params.lists) {
-					listsToLoad = [];
-					$scope.lists.forEach(function (it) {
-						if(params.lists.indexOf(it.id) != -1) {
-							listsToLoad.push(it);
-						}
-					});
-				}
+			if(params.lists) {
+				listsToLoad = [];
+				$scope.lists.forEach(function (it) {
+					if(params.lists.indexOf(it.id) != -1) {
+						listsToLoad.push(it);
+					}
+				});
+			}
 			listsToLoad.forEach(function (it) {
 				++pendingLists;
 				var idHint = '';
@@ -155,7 +155,7 @@ twitlistsApp.controller('twitlistsCtrl',
 						data.shift();
 						Array.prototype.push.apply(list.tweets, data);
 					} else {
-					Array.prototype.unshift.apply(list.tweets, data);
+						Array.prototype.unshift.apply(list.tweets, data);
 					}
 					
 					it.maxTweetId = data[0].id_str;

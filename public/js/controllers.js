@@ -113,6 +113,8 @@ twitlistsApp.controller('twitlistsCtrl',
 		//	alert('hello'+cols.length);
 		}
 	
+		var handersSet = false;
+	
 		function loadTweets(params) {
 			console.log('Load tweets', params);
 			var pendingLists = 0;
@@ -162,7 +164,8 @@ twitlistsApp.controller('twitlistsCtrl',
 					it.minTweetId = data[ data.length - 1 ].id_str;
 					console.log('latest id', data[0].id_str);
 					
-					if(--pendingLists == 0){
+					if(--pendingLists == 0 && !handersSet){
+						handersSet = true;
 						// workaround - it takes time between changing the data and building html
 						setTimeout(setEventHandlers, 1000);
 					}

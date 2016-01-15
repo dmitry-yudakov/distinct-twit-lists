@@ -5,48 +5,55 @@ var OAuth = require('oauth');
 var oauth = new OAuth.OAuth(
 	'https://api.twitter.com/oauth/request_token',
 	'https://api.twitter.com/oauth/access_token',
-	'rTozze3VGXh0hSPEy1mOvvhik', // consumer key
-	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', //'your application secret',
+	'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
+	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
 	'1.0A',
 	null,
 	'HMAC-SHA1'
 );
 
-var debug = false;
 var user_token = '2189917776-ge1q7rTV1ZYV64Qqs2jakPvHvSkNfetX1fIHYKv';
 var user_secret = 'Dc4Ik0YafSnHwNXELGrhHoSUa87X9k7ej0uDL0vKuGrNv';
 
-function oauthGet(url, cb) {
+
+
+function TwitLists(opts) {
+	this.debug = opts && opts.debug;
+}
+
+
+TwitLists.prototype.oauthGet = function(url, cb) {
 	oauth.get(
 		url,
 		user_token,
 		user_secret, 
 		function (e, data, res) {
-			if (debug) console.log( 'URL ', url, 'received data:',
+			if (this.debug) console.log( 'URL ', url, 'received data:',
 								    ((!e && data) ? JSON.parse(data) : data)
 			);
 			cb(e, data, res);
 		});
 }
-function oauthPost(url, params, cb) {
+TwitLists.prototype.oauthPost = function(url, params, cb) {
 	oauth.post(
 		url,
 		user_token,
 		user_secret,
 		params,
 		function (e, data) {
-			if (debug) console.log( 'URL ', url, 'received data:',
+			if (this.debug) console.log( 'URL ', url, 'received data:',
 								    ((!e && data) ? JSON.parse(data) : data)
 			);
 			cb(e, data);
 		});
 }
 
-function getLists(cb) {
-	oauthGet('https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov', cb);
+
+TwitLists.prototype.getLists = function(cb) {
+	this.oauthGet('https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov', cb);
 }
 
-function getStatuses(params, cb) {
+TwitLists.prototype.getStatuses = function(params, cb) {
 	var hint = '';
 	if(params.hint) {
 		console.log(params);
@@ -54,45 +61,39 @@ function getStatuses(params, cb) {
 			hint += '&' + i + '=' + params.hint[i];
 		}
 	}
-	oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + params.listID + '&count=20' + hint, cb);
+	this.oauthGet('https://api.twitter.com/1.1/lists/statuses.json?list_id=' + params.listID + '&count=20' + hint, cb);
 }
 
-function getListMembers(listID, cb) {
+TwitLists.prototype.getListMembers = function(listID, cb) {
 	var maxCount = 5000;
-	oauthGet('https://api.twitter.com/1.1/lists/members.json?list_id=' + listID + '&count=' + maxCount, cb);
+	this.oauthGet('https://api.twitter.com/1.1/lists/members.json?list_id=' + listID + '&count=' + maxCount, cb);
 }
 
-function getFriends(cb) {
+TwitLists.prototype.getFriends = function(cb) {
 	var maxCount = 5000;
-	oauthGet('https://api.twitter.com/1.1/friends/ids.json?screen_name=DmitryYudakov&stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
+	this.oauthGet('https://api.twitter.com/1.1/friends/ids.json?screen_name=DmitryYudakov&stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
 }
 
-function createList(listName, cb) {
-	oauthPost( 'https://api.twitter.com/1.1/lists/create.json',
+TwitLists.prototype.createList = function(listName, cb) {
+	this.oauthPost( 'https://api.twitter.com/1.1/lists/create.json',
 			   {name:listName, mode:'private'}, //?name=test&mode=private
 			   cb);
 }
 
 // membersList is comma separated string
-function addMembersToList(listID, membersList, cb){
-	oauthPost( 'https://api.twitter.com/1.1/lists/members/create_all.json',
+TwitLists.prototype.addMembersToList = function(listID, membersList, cb){
+	this.oauthPost( 'https://api.twitter.com/1.1/lists/members/create_all.json',
 			   {list_id:listID, screen_name :membersList},
 			   cb);
 }
 
 // membersList is comma separated string
-function removeMembersFromList(listID, membersList, cb){
-	oauthPost( 'https://api.twitter.com/1.1/lists/members/destroy_all.json',
+TwitLists.prototype.removeMembersFromList = function(listID, membersList, cb){
+	this.oauthPost( 'https://api.twitter.com/1.1/lists/members/destroy_all.json',
 			   {list_id:listID, screen_name :membersList},
 			   cb);
 }
 
-module.exports = {
-	getLists: getLists,
-	getStatuses: getStatuses,
-	getFriends: getFriends,
-	getListMembers: getListMembers,
-	createList: createList,
-	addMembersToList: addMembersToList,
-	removeMembersFromList: removeMembersFromList
+module.exports.create = function(opts) {
+	return new TwitLists(opts);
 }

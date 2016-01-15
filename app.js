@@ -8,25 +8,14 @@ var express = require('express'),
 	http = require('http'),
 	path = require('path');
 
-var twitlist = require('./twitlist.js');
+var twitlist = require('./twitlist.js').create();
 
 var app = module.exports = express();
 
-
-/**
- * Configuration
- */
-
-// all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-//app.use(morgan('dev'));
-//app.use(bodyParser());
-//app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
-
-
 
 
 app.get('/', function (req, res) {
@@ -41,6 +30,7 @@ app.get('/getLists', function (req, res) {
 		res.send(lists);
 	});
 });
+
 app.get('/getListMembers/:id', function (req, res) {
 	twitlist.getListMembers(req.params.id, function (err, data) {
 		res.send(data);
@@ -52,11 +42,13 @@ app.post('/createList/:name', function(req, res) {
 		res.send(data);
 	});
 });
+
 app.post('/addMembersToList/:listid/:members', function(req, res) {
 	twitlist.addMembersToList( req.params.listid, req.params.members, function(err,data){
 		res.send(data);
 	});
 });
+
 app.post('/moveMember/:member/:srcList/:targetList', function(req, res) {
 	console.log('Move %s from %s to %s', req.params.member, req.params.srcList, req.params.targetList);
 										   
@@ -78,7 +70,6 @@ app.get('/getFriends', function (req, res) {
 	});
 });
 
-
 app.get('/getStatuses/:id', function (req, res) {
 //	console.log("req", req);
 	if(!req.params.id) {
@@ -92,46 +83,12 @@ app.get('/getStatuses/:id', function (req, res) {
 		res.send(statuses);
 	});
 });
+
 app.get('/showList/:id', function (req, res) {
 	twitlist.getLists(function (err, lists) {
 		res.send(lists);
 	});
 });
-
-
-
-
-//var env = process.env.NODE_ENV || 'development';
-//
-//// development only
-//if (env === 'development') {
-////  app.use(express.errorHandler());
-//}
-//
-//// production only
-//if (env === 'production') {
-//  // TODO
-//}
-
-
-/**
- * Routes
- */
-
-// serve index and view partials
-//app.get('/', routes.index);
-//app.get('/partials/:name', routes.partials);
-
-// JSON API
-//app.get('/api/name', api.name);
-
-// redirect all others to the index (HTML5 history)
-//app.get('*', routes.index);
-
-
-/**
- * Start Server
- */
 
 http.createServer(app).listen(app.get('port'), function () {
 	console.log('Express server listening on port ' + app.get('port'));

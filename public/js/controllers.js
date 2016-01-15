@@ -1,4 +1,4 @@
-var twitlistsApp = angular.module('twitlists', ['ngRoute', 'infinite-scroll']);
+var twitlistsApp = angular.module('twitlists', ['ngRoute']);
 
 twitlistsApp.controller('twitlistsCtrl',
 	function ($scope, $http, $routeParams) {
@@ -63,7 +63,6 @@ twitlistsApp.controller('twitlistsCtrl',
 		function setEventHandlers() {
 			console.log('Set drag&drop event handlers');
 			var cols = document.querySelectorAll('.twcolumn');
-//			var cols = document.querySelectorAll('.listName');
 			[].forEach.call(cols, function (col) {
 				col.addEventListener('dragstart', function(e){
 					var item = {
@@ -82,7 +81,6 @@ twitlistsApp.controller('twitlistsCtrl',
 				col.addEventListener('dragover', function(e){
 		//			console.log('dragover',e);
 					e.preventDefault();
-		//			console.log('preventDefault',e);
 				}, false);
 //				col.addEventListener('dragleave', function(e){console.log('dragleave',e)}, false);
 				function createDropHandler(targetListName){
@@ -110,7 +108,6 @@ twitlistsApp.controller('twitlistsCtrl',
 //				col.addEventListener('dragend', function(e){console.log('dragend',e)}, false);
 				console.log('Register event');
 			});
-		//	alert('hello'+cols.length);
 		}
 	
 		var handersSet = false;

@@ -2,15 +2,16 @@
 
 
 var OAuth = require('oauth');
-var oauth = new OAuth.OAuth(
-	'https://api.twitter.com/oauth/request_token',
-	'https://api.twitter.com/oauth/access_token',
-	'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
-	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
-	'1.0A',
-	null,
-	'HMAC-SHA1'
-);
+var oauth;
+//= new OAuth.OAuth(
+//	'https://api.twitter.com/oauth/request_token',
+//	'https://api.twitter.com/oauth/access_token',
+//	'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
+//	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
+//	'1.0A',
+//	null,
+//	'HMAC-SHA1'
+//);
 
 var user_token = '2189917776-ge1q7rTV1ZYV64Qqs2jakPvHvSkNfetX1fIHYKv';
 var user_secret = 'Dc4Ik0YafSnHwNXELGrhHoSUa87X9k7ej0uDL0vKuGrNv';
@@ -19,14 +20,51 @@ var user_secret = 'Dc4Ik0YafSnHwNXELGrhHoSUa87X9k7ej0uDL0vKuGrNv';
 
 function TwitLists(opts) {
 	this.debug = opts && opts.debug;
+	//this.oauth = null;
+	this.logged = false;
+}
+
+TwitLists.prototype.logIn = function(oauth_callback, cb) {
+	console.log('getOAuthRequestToken');
+	if(!oauth) {
+		oauth = new OAuth.OAuth(
+			'https://api.twitter.com/oauth/request_token',
+			'https://api.twitter.com/oauth/access_token',
+			'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
+			's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
+			'1.0A',
+//			null, 
+			oauth_callback,
+			'HMAC-SHA1'
+		);
+		
+		var that = this;
+		oauth.getOAuthRequestToken(function(err, token, token_secret, parsedQueryString) {
+			console.log('!! arguments:', arguments);
+			if(err) {
+				console.log('Error:', err);
+				return cb(JSON.stringify(err));
+			}
+			that.user_token = token;
+			that.user_secret = token_secret;
+			that.logged = true;
+
+			cb(null, token);
+		});
+	} else {
+		cb(null, this.user_token);
+	}
 }
 
 
 TwitLists.prototype.oauthGet = function(url, cb) {
+	if(!this.logged) {
+		return cb('Not logged on twitter');
+	}
 	oauth.get(
 		url,
-		user_token,
-		user_secret, 
+		this.user_token,
+		this.user_secret, 
 		function (e, data, res) {
 			if (this.debug) console.log( 'URL ', url, 'received data:',
 								    ((!e && data) ? JSON.parse(data) : data)
@@ -35,10 +73,13 @@ TwitLists.prototype.oauthGet = function(url, cb) {
 		});
 }
 TwitLists.prototype.oauthPost = function(url, params, cb) {
+	if(!this.logged) {
+		return cb('Not logged on twitter');
+	}
 	oauth.post(
 		url,
-		user_token,
-		user_secret,
+		this.user_token,
+		this.user_secret,
 		params,
 		function (e, data) {
 			if (this.debug) console.log( 'URL ', url, 'received data:',

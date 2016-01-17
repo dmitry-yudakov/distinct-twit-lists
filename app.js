@@ -19,14 +19,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/', function (req, res) {
-	res.render('index', {
-		title: 'Distinct Twitter Lists'
-	});
-
+//	console.log('req:', req);
+	if(!twitlist.logged) {
+		var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+//		console.log('fullUrl:', fullUrl);
+		twitlist.logIn(fullUrl, function(err, token) {
+			if(err) {
+				// This template is used for this error only, 
+				// it could be extended in future to handle this situation better
+				res.render('error', {
+					error_message: 'Unable to login to twitter: ' + err
+				});
+				return;
+			}
+			res.redirect(302, 'https://api.twitter.com/oauth/authenticate?oauth_token='+token);
+		});
+	} else {
+		res.render('index', {});
+	}
 });
 
 app.get('/getLists', function (req, res) {
 	twitlist.getLists(function (err, lists) {
+		if(err) {
+			console.log('Cannot get lists:', err);
+			return res.send( 'Unable to load lists: ' + JSON.stringify(err) );
+		}
 		res.send(lists);
 	});
 });

@@ -183,6 +183,11 @@ twitlistsApp.controller('twitlistsCtrl',
 	
 		++pending;
 		$http.get('/getLists').success(function (data) {
+			console.log('getLists data:', data);
+			if(typeof data === 'string') {
+				$scope.errorMessage = data;
+				return;
+			}
 			$scope.lists = data;
 			--pending;
 			if (data.length) {

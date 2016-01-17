@@ -1,23 +1,10 @@
 html(ng-app='twitlists')
-	head
-		title!= title
-		script(src="/angular/angular.js")
-		script(src="/angular-route/angular-route.js")
-		script(src="/js/controllers.js")
-		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
-		link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
-		//link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css")
-		script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js")
-		style
-			include style.css
+	include ./head.jade
 	
 	body(ng-controller='twitlistsCtrl')
-		nav(class="navbar navbar-default")
-			div(class="container-fluid")
-				div(class="navbar-header")
-					a(class="navbar-brand" href="#") 
-						!= title
+		include ./navbar.jade
 		div(class="container twpanel")
+			div(ng-show='errorMessage') {{errorMessage}}
 			div(class="row")
 				.twcolumn(ng-repeat="twList in tweetsByList")
 					.listName

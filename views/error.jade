@@ -1,0 +1,7 @@
+html(ng-app='twitlists')
+	include ./head.jade
+	
+	body(ng-controller='twitlistsCtrl')
+		include ./navbar.jade
+		div(class="container twpanel")
+			p(style="color:red")= error_message

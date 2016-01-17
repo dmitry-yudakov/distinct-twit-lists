@@ -1,37 +1,24 @@
+var OAuth = require('oauth');
+
 //oauth_consumer_key = "zgTw9HRJpjMmhzFrgZjyIN3Pp", oauth_nonce = "c8e140a69e365b260bd89beeb0f22beb", oauth_signature = "AokFfOjPsnDe68mcPYoMaTODHS8%3D", oauth_signature_method = "HMAC-SHA1", oauth_timestamp = "1419948792", oauth_token = "2189917776-fjORdeQFd8N7xfH4WDLZKjdIMryrZUjTNZYVfiY", oauth_version = "1.0"
 
-
-var OAuth = require('oauth');
-var oauth;
-//= new OAuth.OAuth(
-//	'https://api.twitter.com/oauth/request_token',
-//	'https://api.twitter.com/oauth/access_token',
-//	'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
-//	's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
-//	'1.0A',
-//	null,
-//	'HMAC-SHA1'
-//);
-
-var user_token = '2189917776-ge1q7rTV1ZYV64Qqs2jakPvHvSkNfetX1fIHYKv';
-var user_secret = 'Dc4Ik0YafSnHwNXELGrhHoSUa87X9k7ej0uDL0vKuGrNv';
-
-
+var consumer_key = 'rTozze3VGXh0hSPEy1mOvvhik';
+var app_secret = 's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv';
 
 function TwitLists(opts) {
 	this.debug = opts && opts.debug;
-	//this.oauth = null;
+	this.oauth = null;
 	this.logged = false;
 }
 
 TwitLists.prototype.logIn = function(oauth_callback, cb) {
 	console.log('getOAuthRequestToken');
-	if(!oauth) {
-		oauth = new OAuth.OAuth(
+	if(!this.oauth) {
+		this.oauth = new OAuth.OAuth(
 			'https://api.twitter.com/oauth/request_token',
 			'https://api.twitter.com/oauth/access_token',
-			'rTozze3VGXh0hSPEy1mOvvhik', 							// consumer key
-			's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv', 	//'your application secret',
+			consumer_key,
+			app_secret,
 			'1.0A',
 //			null, 
 			oauth_callback,
@@ -39,14 +26,14 @@ TwitLists.prototype.logIn = function(oauth_callback, cb) {
 		);
 		
 		var that = this;
-		oauth.getOAuthRequestToken(function(err, token, token_secret, parsedQueryString) {
-			console.log('!! arguments:', arguments);
+		this.oauth.getOAuthRequestToken(function(err, token, token_secret, parsedQueryString) {
+//			console.log('!! arguments:', arguments);
 			if(err) {
 				console.log('Error:', err);
 				return cb(JSON.stringify(err));
 			}
-			that.user_token = token;
-			that.user_secret = token_secret;
+			that.token = token;
+			that.token_secret = token_secret;
 			that.logged = true;
 
 			cb(null, token);
@@ -56,12 +43,24 @@ TwitLists.prototype.logIn = function(oauth_callback, cb) {
 	}
 }
 
+TwitLists.prototype.obtainAccessToken = function(oauth_token, oauth_verifier, cb) {
+	var that = this;
+	this.oauth.getOAuthAccessToken(	this.token, // it's same as oauth_token
+									this.token_secret,
+									oauth_verifier,
+									function(err, oauth_access_token, oauth_access_token_secret, results) {
+		if(err) return cb(JSON.stringify(err));
+		that.user_token = oauth_access_token;
+		that.user_secret = oauth_access_token_secret;
+		cb(null);
+	});
+}
 
 TwitLists.prototype.oauthGet = function(url, cb) {
 	if(!this.logged) {
 		return cb('Not logged on twitter');
 	}
-	oauth.get(
+	this.oauth.get(
 		url,
 		this.user_token,
 		this.user_secret, 
@@ -76,7 +75,7 @@ TwitLists.prototype.oauthPost = function(url, params, cb) {
 	if(!this.logged) {
 		return cb('Not logged on twitter');
 	}
-	oauth.post(
+	this.oauth.post(
 		url,
 		this.user_token,
 		this.user_secret,

@@ -35,7 +35,20 @@ app.get('/', function (req, res) {
 			res.redirect(302, 'https://api.twitter.com/oauth/authenticate?oauth_token='+token);
 		});
 	} else {
-		res.render('index', {});
+		console.log('req query:', req.query);
+		if(req.query.oauth_token && req.query.oauth_verifier) {
+			// it doesnt feel the right place TODO
+			twitlist.obtainAccessToken(req.query.oauth_token, req.query.oauth_verifier, function(err){
+				if(err) return res.render('error', {
+					error_message: 'Unable to get access token: ' + err
+				});
+				
+				return res.render('index', {}); // ole ole, all good
+			});
+		} else {
+			//
+			return res.render('index', {});
+		}
 	}
 });
 

@@ -8,10 +8,10 @@ var app_secret = 's6uCmjBVllhdrGEzBridoEVjoseozT2wTearpddGycdngpQVrv';
 function TwitLists(opts) {
 	this.debug = opts && opts.debug;
 	this.oauth = null;
-	this.logged = false;
+	this.signedIn = false;
 }
 
-TwitLists.prototype.logIn = function(oauth_callback, cb) {
+TwitLists.prototype.signIn = function(oauth_callback_uri, cb) {
 	console.log('getOAuthRequestToken');
 	if(!this.oauth) {
 		this.oauth = new OAuth.OAuth(
@@ -21,7 +21,7 @@ TwitLists.prototype.logIn = function(oauth_callback, cb) {
 			app_secret,
 			'1.0A',
 //			null, 
-			oauth_callback,
+			oauth_callback_uri,
 			'HMAC-SHA1'
 		);
 		
@@ -30,11 +30,11 @@ TwitLists.prototype.logIn = function(oauth_callback, cb) {
 //			console.log('!! arguments:', arguments);
 			if(err) {
 				console.log('Error:', err);
+				this.oauth = null;//??
 				return cb(JSON.stringify(err));
 			}
 			that.token = token;
 			that.token_secret = token_secret;
-			that.logged = true;
 
 			cb(null, token);
 		});
@@ -52,13 +52,14 @@ TwitLists.prototype.obtainAccessToken = function(oauth_token, oauth_verifier, cb
 		if(err) return cb(JSON.stringify(err));
 		that.user_token = oauth_access_token;
 		that.user_secret = oauth_access_token_secret;
+		that.signedIn = true;
 		cb(null);
 	});
 }
 
 TwitLists.prototype.oauthGet = function(url, cb) {
-	if(!this.logged) {
-		return cb('Not logged on twitter');
+	if(!this.signedIn) {
+		return cb('Not signed in on twitter');
 	}
 	this.oauth.get(
 		url,
@@ -72,8 +73,8 @@ TwitLists.prototype.oauthGet = function(url, cb) {
 		});
 }
 TwitLists.prototype.oauthPost = function(url, params, cb) {
-	if(!this.logged) {
-		return cb('Not logged on twitter');
+	if(!this.signedIn) {
+		return cb('Not signed in on twitter');
 	}
 	this.oauth.post(
 		url,
@@ -90,7 +91,7 @@ TwitLists.prototype.oauthPost = function(url, params, cb) {
 
 
 TwitLists.prototype.getLists = function(cb) {
-	this.oauthGet('https://api.twitter.com/1.1/lists/list.json?screen_name=DmitryYudakov', cb);
+	this.oauthGet('https://api.twitter.com/1.1/lists/list.json', cb);
 }
 
 TwitLists.prototype.getStatuses = function(params, cb) {
@@ -111,7 +112,7 @@ TwitLists.prototype.getListMembers = function(listID, cb) {
 
 TwitLists.prototype.getFriends = function(cb) {
 	var maxCount = 5000;
-	this.oauthGet('https://api.twitter.com/1.1/friends/ids.json?screen_name=DmitryYudakov&stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
+	this.oauthGet('https://api.twitter.com/1.1/friends/ids.json?stringify_ids=true&count=' + maxCount, cb); // TODO load more than 5K
 }
 
 TwitLists.prototype.createList = function(listName, cb) {

@@ -20,36 +20,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function (req, res) {
 //	console.log('req:', req);
-	if(!twitlist.logged) {
-		var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-//		console.log('fullUrl:', fullUrl);
-		twitlist.logIn(fullUrl, function(err, token) {
-			if(err) {
-				// This template is used for this error only, 
-				// it could be extended in future to handle this situation better
-				res.render('error', {
-					error_message: 'Unable to login to twitter: ' + err
-				});
-				return;
-			}
-			res.redirect(302, 'https://api.twitter.com/oauth/authenticate?oauth_token='+token);
-		});
-	} else {
-		console.log('req query:', req.query);
-		if(req.query.oauth_token && req.query.oauth_verifier) {
-			// it doesnt feel the right place TODO
-			twitlist.obtainAccessToken(req.query.oauth_token, req.query.oauth_verifier, function(err){
-				if(err) return res.render('error', {
-					error_message: 'Unable to get access token: ' + err
-				});
-				
-				return res.render('index', {}); // ole ole, all good
-			});
-		} else {
-			//
-			return res.render('index', {});
-		}
+	if(twitlist.signedIn) {
+		return res.render('index', {});
 	}
+	
+	// not signedIn
+	var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl+'signedIn';
+//		console.log('fullUrl:', fullUrl);
+	twitlist.signIn(fullUrl, function(err, token) {
+		if(err) {
+			return res.render('error', {
+				error_message: 'Unable to login to twitter: ' + err
+			});
+		}
+		res.redirect(302, 'https://api.twitter.com/oauth/authenticate?oauth_token='+token);
+	});
+});
+
+app.get('/signedIn', function (req, res) {
+	console.log('req query:', req.query);
+	if(!req.query.oauth_token || !req.query.oauth_verifier) {
+		return res.render('error', {
+			error_message: 'Missing oauth token and verifier'
+		});
+	}
+	
+	twitlist.obtainAccessToken(req.query.oauth_token, req.query.oauth_verifier, function(err){
+		if(err) return res.render('error', {
+			error_message: 'Unable to get access token: ' + err
+		});
+
+		return res.redirect('/');
+	});
 });
 
 app.get('/getLists', function (req, res) {

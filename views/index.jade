@@ -9,7 +9,7 @@ html(ng-app='twitlists')
 				.twcolumn(ng-repeat="twList in tweetsByList")
 					.listName
 						h4 {{twList.name}}
-						a(href="#" ng-click="print(twList)") pp
+						//a(href="#" ng-click="print(twList)") pp
 					.listTweets
 						//(infinite-scroll="loadMore(twList)")
 						div(class="panel panel-default tweet" ng-repeat='tw in twList.tweets') 
@@ -26,5 +26,5 @@ html(ng-app='twitlists')
 									div(class="tweet-text") {{tw.text }} 
 										a(href="{{tw.entities.urls[0].url}}") link
 										| 
-										a(href="#" ng-click="print(tw)") pp
+										//a(href="#" ng-click="print(tw)") pp
 						button(class="btn btn-default" class="loadMore" ng-click='loadMore(twList)') Load More

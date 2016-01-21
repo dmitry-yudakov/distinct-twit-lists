@@ -31,6 +31,9 @@ twitlistsApp.controller('twitlistsCtrl',
 	
 		function loadListsMembers(cbDone) {
 			var pending = 0;
+			if($scope.lists.length === 0)
+				return cbDone();
+
 			$scope.lists.forEach(function (it) {
 				++pending;
 				$http.get('/getListMembers/' + it.id).success(function (data) {
@@ -49,7 +52,7 @@ twitlistsApp.controller('twitlistsCtrl',
 		}
 
 		function detectFriendsNotInLists(cbDone) {
-			//			console.log('detectFriendsNotInLists');
+			console.log('detectFriendsNotInLists');
 			//			console.log($scope);
 
 			var defaultListID;
@@ -92,7 +95,9 @@ twitlistsApp.controller('twitlistsCtrl',
 				console.log('default list not found');
 				$http.post('/createList/' + defaultList).success(function (data) {
 					console.log('Created default list');
-					$scope.addMembersToDefautList(data.id_str);
+					loadLists(function() { // it's to assure that Default list will appear without refreshing the page
+						$scope.addMembersToDefautList(data.id_str);
+					});
 				});
 			} else {
 				console.log('default list found, id', defaultListID);
@@ -217,6 +222,7 @@ twitlistsApp.controller('twitlistsCtrl',
 		}
 		
 		$scope.detectUnlistedFriends = function() {
+			console.log('detectUnlistedFriends()');
 			//TODO fix this shit with async or promises
 			loadLists(function() {
 				loadFriends(function() {

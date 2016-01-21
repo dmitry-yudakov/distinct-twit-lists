@@ -57,6 +57,14 @@
 	height: 88%;
 }
 
+.loadMore
+{
+/*	text-align: center;*/
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
 .dy_screen_name
 {
 	cursor: move;

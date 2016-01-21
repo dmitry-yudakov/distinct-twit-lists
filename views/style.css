@@ -1,7 +1,7 @@
 .tweet 
 {
 /*	display: inline; */
-	width: 400px;
+	max-width: 400px;
 /*	margin: 5px; */
 /*	//margin-bottom:10px;*/
 /*	//margin:auto;*/

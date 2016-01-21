@@ -44,7 +44,7 @@ twitlistsApp.controller('twitlistsCtrl',
 		function moveMember(member, fromListId, toListId) {
 			$http.post('/moveMember/'+member+'/'+fromListId+'/'+ toListId).success(function (data) {
 				console.log('Move completed');
-				loadTweets({lists:[fromListId, toListId], reload:true});
+				loadTweets({lists:[fromListId, toListId]});
 			});
 		}
 
@@ -163,18 +163,13 @@ twitlistsApp.controller('twitlistsCtrl',
 			listsToLoad.forEach(function (it) {
 				++pendingLists;
 				var idHint = '';
-				if(!params.reload) { // partial load - either load new or load more
-					if(params.append) {
-						if(it.minTweetId) idHint += '?max_id=' + it.minTweetId;
-					} else {
-						if(it.maxTweetId) idHint += '?since_id=' + it.maxTweetId;
-					}
+				if(params.append) {
+					if(it.minTweetId) idHint += '?max_id=' + it.minTweetId;
 				}
 				
 				$http.get('/getStatuses/' + it.id + idHint).success(function (data) {
 					console.log('received statuses data', data);
-					if(!data.length)
-						return;
+					
 					var list = $scope.tweetsByList[it.name];
 					if( ! list ) {
 						$scope.tweetsByList[it.name] = list = {
@@ -183,15 +178,20 @@ twitlistsApp.controller('twitlistsCtrl',
 							tweets: []
 						};
 					}
-					//append new tweets to the old ones
-					if(params.append) {
-						//first receive tweet we already have
+
+					if(params.append) {//append new tweets to the old ones
+						//remove the first tweet that we already have
 						data.shift();
 						Array.prototype.push.apply(list.tweets, data);
 					} else {
-						Array.prototype.unshift.apply(list.tweets, data);
+						list.tweets = data;
 					}
 					
+					if(!data.length) {
+						it.maxTweetId = it.minTweetId = '';
+						return;
+					}
+
 					it.maxTweetId = data[0].id_str;
 					it.minTweetId = data[ data.length - 1 ].id_str;
 					console.log('latest id', data[0].id_str);

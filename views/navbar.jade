@@ -1,5 +1,9 @@
 nav(class="navbar navbar-default")
 	div(class="container-fluid")
 		div(class="navbar-header")
-			a(class="navbar-brand" href="#") 
-				div Distinct Twitter Lists
+			a(class="navbar-brand" href="#") Distinct Twitter Lists
+		div(class="collapse navbar-collapse" id="bs-example-navbar-collapse-1")
+			ul(class="nav navbar-nav")
+				li
+					a(href="#" ng-click="detectUnlistedFriends()") Detect unlisted friends
+					//button(class="btn btn-default navbar-btn") Check for friends not in lists

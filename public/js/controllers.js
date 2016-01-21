@@ -2,9 +2,51 @@ var twitlistsApp = angular.module('twitlists', ['ngRoute']);
 
 twitlistsApp.controller('twitlistsCtrl',
 	function ($scope, $http, $routeParams) {
-		var pending = 0;
 		var defaultList = 'Default';
+		var handlersSet = false;
 		$scope.tweetsByList = {};
+
+		function loadLists(cbDone) {
+			$http.get('/getLists').success(function (data) {
+				console.log('getLists data:', data);
+				if(typeof data === 'string') {
+					$scope.errorMessage = data;
+					return;
+				}
+				$scope.lists = data;
+				return cbDone();
+			});
+		}
+	
+		function loadFriends(cbDone) {
+			$http.get('/getFriends').success(function (data) {
+				//convert received array to object for faster search
+				$scope.friends = {};
+				data.ids.forEach(function (friend) {
+					$scope.friends[friend] = true;
+				});
+				cbDone();
+			});
+		}
+	
+		function loadListsMembers(cbDone) {
+			var pending = 0;
+			$scope.lists.forEach(function (it) {
+				++pending;
+				$http.get('/getListMembers/' + it.id).success(function (data) {
+					it.members = data.users;
+					if (--pending === 0)
+						cbDone();
+				});
+			});
+		}
+	
+		function moveMember(member, fromListId, toListId) {
+			$http.post('/moveMember/'+member+'/'+fromListId+'/'+ toListId).success(function (data) {
+				console.log('Move completed');
+				loadTweets({lists:[fromListId, toListId], reload:true});
+			});
+		}
 
 		function detectFriendsNotInLists(cbDone) {
 			//			console.log('detectFriendsNotInLists');
@@ -95,10 +137,7 @@ twitlistsApp.controller('twitlistsCtrl',
 						console.log('Target list: ', targetListId);
 						if(item.list != targetListName) {
 							console.log('Move %s from %s to %s', item.member, item.list, targetListName);
-							$http.post('/moveMember/'+item.member+'/'+item.list_id+'/'+ targetListId).success(function (data) {
-								console.log('Move completed');
-								loadTweets({lists:[item.list_id, targetListId], reload:true});
-							});
+							moveMember(item.member, item.list_id, targetListId);
 						}
 					}
 				}
@@ -110,21 +149,17 @@ twitlistsApp.controller('twitlistsCtrl',
 			});
 		}
 	
-		var handersSet = false;
-	
 		function loadTweets(params) {
 			console.log('Load tweets', params);
 			var pendingLists = 0;
 			var listsToLoad = $scope.lists;
 
-			if(params.lists) {
-				listsToLoad = [];
-				$scope.lists.forEach(function (it) {
-					if(params.lists.indexOf(it.id) != -1) {
-						listsToLoad.push(it);
-					}
+			if(params.lists) { // load tweets for some lists only
+				listsToLoad = listsToLoad.filter(function(it) {
+					return params.lists.indexOf(it.id) != -1;
 				});
 			}
+
 			listsToLoad.forEach(function (it) {
 				++pendingLists;
 				var idHint = '';
@@ -161,8 +196,8 @@ twitlistsApp.controller('twitlistsCtrl',
 					it.minTweetId = data[ data.length - 1 ].id_str;
 					console.log('latest id', data[0].id_str);
 					
-					if(--pendingLists == 0 && !handersSet){
-						handersSet = true;
+					if(--pendingLists == 0 && !handlersSet){
+						handlersSet = true;
 						// workaround - it takes time between changing the data and building html
 						setTimeout(setEventHandlers, 1000);
 					}
@@ -170,62 +205,33 @@ twitlistsApp.controller('twitlistsCtrl',
 			});
 		}
 
-
-//		++pending;
-//		$http.get('/getFriends').success(function (data) {
-//			//convert received array to object for faster search
-//			$scope.friends = {};
-//			data.ids.forEach(function (friend) {
-//				$scope.friends[friend] = true;
-//			});
-//			if (--pending === 0) detectFriendsNotInLists();
-//		});
 	
-		++pending;
-		$http.get('/getLists').success(function (data) {
-			console.log('getLists data:', data);
-			if(typeof data === 'string') {
-				$scope.errorMessage = data;
-				return;
-			}
-			$scope.lists = data;
-			--pending;
-			if (data.length) {
-				$scope.setCurrentList(data[0]);
-			}
-//			$scope.lists.forEach(function (it) {
-//				++pending;
-//
-//				$http.get('/getListMembers/' + it.id).success(function (data) {
-//					it.members = data.users;
-//					if (--pending === 0) detectFriendsNotInLists(function(){
-//						loadTweets({append:false});
-//					});
-//				});
-//			});
-			
-			loadTweets({append:false});
-//			setInterval(function(){loadTweets({append:false})}, 30*1000);
-		});
-
-		$scope.setCurrentList = function (list) {
-			//			$scope.currentList = list;
-			//			$http.get('/getStatuses/' + $scope.currentList.id).success(function (data) {
-			//				$scope.tweets = data;
-			//			});
-		}
-		//	$scope.currentList = '';
-		//	$http.get('/getStatuses/'+$routeParams.listID).success(function(data){
-
 		$scope.print = function(tw) {
 //			alert(JSON.stringify(tw, null, '\t'));
 			console.log(tw);
 		}
 		
 		$scope.loadMore = function(tweetList) {
-//			alert('Load more');
 			console.log('Load more', tweetList);
 			loadTweets({lists: [tweetList.info.id], append: true});
 		}
+		
+		$scope.detectUnlistedFriends = function() {
+			//TODO fix this shit with async or promises
+			loadLists(function() {
+				loadFriends(function() {
+					loadListsMembers(function() {
+						detectFriendsNotInLists(function(){
+							loadTweets({append:false});
+						});
+					});
+				});
+			});
+		}
+		
+		// initial loading lists and tweets
+		loadLists(function() {
+			loadTweets({append:false});
+		});
 	}
 );
